@@ -97,6 +97,7 @@ fn main() {
 
 	match key as u8 as char {
 	    'q'  => state = GameState::End,
+	    ' ' => state = GameState::Play,
 	    '\n' => state = GameState::Play,
 	     _   => state = GameState::Setup
 	}
