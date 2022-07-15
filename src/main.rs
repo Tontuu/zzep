@@ -5,7 +5,9 @@ use rand::Rng;
 
 const SETUP_TEXT: &str = "Reaction-Time Game";
 const KEYS_TEXT: &str = "Press any key to start";
+const QUIT_TEXT: &str = "q to quit";
 const READY_TEXT: &str = "Get Ready";
+const READY_TEXT2: &str = "5 seconds to answer";
 const WIN_TEXT: &str = "You won!";
 const LOSE_TEXT: &str = "You lost";
 
@@ -40,10 +42,6 @@ impl Ui {
 	self.pos = Vec2 { x: 0, y: 0};
     }
 
-    fn set_pos(&mut self, pos: Vec2) {
-	self.pos = pos;
-    }
-
     fn center_pos(&mut self) {
 	self.pos.x = COLS()/2-1;
 	self.pos.y = LINES()/2-1;
@@ -69,21 +67,32 @@ fn setup(ui: &mut Ui) {
     ui.label(SETUP_TEXT);
     attroff(A_STANDOUT());
 
+    attron(A_BOLD());
     ui.offset(KEYS_TEXT.len() as i32 / 2, 2);
     ui.label(KEYS_TEXT);
+    attroff(A_BOLD());
+
+    ui.offset(QUIT_TEXT.len() as i32 / 2, 3);
+    ui.label(QUIT_TEXT);
 }
 
 fn init_game(ui: &mut Ui) -> (Result, String) {
     noecho();
+    clear();
 
     let rand_row = rand::thread_rng().gen_range(0..LINES()-1);
     let rand_col = rand::thread_rng().gen_range(0..COLS()-1);
     let rand_ch = rand::thread_rng().gen_range(65..90) as u8 as char;
     let cooldown = rand::thread_rng().gen_range(1..5);
 
-    clear();
+    
+    attron(A_BOLD());
     ui.offset(READY_TEXT.len() as i32 / 2, 0);
     ui.label(READY_TEXT);
+    attroff(A_BOLD());
+
+    ui.offset(READY_TEXT2.len() as i32 / 2, 1);
+    ui.label(READY_TEXT2);
 
     refresh();
     sleep(Duration::from_secs(2));
@@ -116,10 +125,11 @@ fn init_game(ui: &mut Ui) -> (Result, String) {
     flushinp();
 
     let key = getch() as u8 as char;
-
-
+    
+    let time_remaining = Duration::from_secs(5);
+    
     let mut result = Result::Lose;
-    if key == rand_ch { result = Result::Win; }
+    if key == rand_ch && now.elapsed().as_secs() <= time_remaining.as_secs() { result = Result::Win }
 
     let time_spent = format!("{:.8}ms", now.elapsed().as_secs_f32().to_string());
 
@@ -161,7 +171,7 @@ fn main() {
 	    attroff(A_BOLD());
 
 	    ui.offset(time.len() as i32 / 2, 1);
-	    ui.label(&time)
+	    ui.label(&time);
 	}
 
 	refresh();
