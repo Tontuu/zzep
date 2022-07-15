@@ -1,4 +1,4 @@
-[![GIF Zzep](https://asciinema.org/a/uyGtlgP8vo7L13Y84zKsYpEVh.svg)](https://asciinema.org/a/uyGtlgP8vo7L13Y84zKsYpEVh)
+<img src="assets/zzep_example.gif">
 
 # Zzep
 Simple Reaction Time Tester made with [ncurses](https://crates.io/crates/ncurses) for measuring how much time do you waste before acting **X)**
