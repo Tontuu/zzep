@@ -1,9 +1,9 @@
 # Zzep
-Simple Reaction Time Tester made with [ncurses](https://crates.io/crates/ncurses) for measuring how much time do you waste before acting **X)**
+Simple Reaction Time Tester made with [ncurses](https://crates.io/crates/ncurses) for measuring how long it takes you to act **X)**
 
 <img src="assets/zzep_example.gif">
 
-## Quick Start
+## Usage
 ```console
 $ cargo run
 ```
