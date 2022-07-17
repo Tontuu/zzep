@@ -10,6 +10,8 @@ const READY_TEXT: &str = "Get Ready";
 const READY_TEXT2: &str = "5 seconds to answer";
 const WIN_TEXT: &str = "You won!";
 const LOSE_TEXT: &str = "You lost";
+const TIMES_UP_TEXT: &str = "Time's up";
+const TIME_REMAINING: i32 = 5;
 
 #[derive(PartialEq)]
 enum GameState {
@@ -19,7 +21,7 @@ enum GameState {
 }
 
 #[derive(PartialEq)]
-enum Result {
+enum GameResult {
     Win,
     Lose
 }
@@ -76,8 +78,7 @@ fn setup(ui: &mut Ui) {
     ui.label(QUIT_TEXT);
 }
 
-fn init_game(ui: &mut Ui) -> (Result, String) {
-    noecho();
+fn init_game(ui: &mut Ui) -> (GameResult, String) {
     clear();
 
     let rand_row = rand::thread_rng().gen_range(0..LINES()-1);
@@ -95,7 +96,7 @@ fn init_game(ui: &mut Ui) -> (Result, String) {
     ui.label(READY_TEXT2);
 
     refresh();
-    sleep(Duration::from_secs(2));
+    sleep(Duration::from_secs(4));
     for i in (1..4).rev() {
 	clear();
 
@@ -124,21 +125,32 @@ fn init_game(ui: &mut Ui) -> (Result, String) {
     // Throws away any typeahead that has been typed by the user at waiting time.
     flushinp();
 
+
+    halfdelay(TIME_REMAINING*10);
+
+    let mut result = GameResult::Lose;
+
+    let time_remaining = Duration::from_secs(TIME_REMAINING as u64);
+
     let key = getch() as u8 as char;
+
+    if now.elapsed().as_secs() >= time_remaining.as_secs() {
+	let times_up = format!("{} :<", TIMES_UP_TEXT);
+	return (result, times_up);
+    }
     
-    let time_remaining = Duration::from_secs(5);
     
-    let mut result = Result::Lose;
-    if key == rand_ch && now.elapsed().as_secs() <= time_remaining.as_secs() { result = Result::Win }
+    if key == rand_ch { result = GameResult::Win }
 
     let time_spent = format!("{:.8}ms", now.elapsed().as_secs_f32().to_string());
 
 
     (result, time_spent)
 }
-
 fn main() {
+
     initscr();
+    noecho();
     curs_set(CURSOR_VISIBILITY::CURSOR_INVISIBLE);
 
     let mut state = GameState::Setup;
@@ -146,6 +158,7 @@ fn main() {
     ui.center_pos();
 
     while state != GameState::End {
+
 	if state == GameState::Setup {
 	    setup(&mut ui);
 	}
@@ -158,10 +171,11 @@ fn main() {
 	}
 
 	if state == GameState::Play {
+	    nocbreak();
 	    let (result, time) = init_game(&mut ui);
 
 	    attron(A_BOLD());
-	    if result == Result::Win {
+	    if result == GameResult::Win {
 		ui.offset(WIN_TEXT.len() as i32 / 2, 0);
 		ui.label(WIN_TEXT);
 	    } else {
@@ -172,10 +186,13 @@ fn main() {
 
 	    ui.offset(time.len() as i32 / 2, 1);
 	    ui.label(&time);
+	    let _key = getch() as u8 as char;
+	    state = GameState::Setup;
 	}
 
 	refresh();
     }
     endwin();
+
 }
 
